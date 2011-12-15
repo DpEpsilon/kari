@@ -182,7 +182,7 @@ kari_value_t* kari_execute(kari_context_t* ctx, kari_token_t** tokens, size_t to
                 break;
             }
             tmp_val = FNSTACK_POP();
-            value = tmp_val->type == KARI_NATIVE_FUNCTION
+            value = K_TYPE_OF(tmp_val) == KARI_NATIVE_FUNCTION
                 ? ((kari_native_function_t*)tmp_val)->call(((kari_native_function_t*)tmp_val)->context, ((kari_native_function_t*)tmp_val)->state, value, err)
                 : kari_call(tmp_val, value, err);
             if(*err) {
