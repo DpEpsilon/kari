@@ -10,4 +10,6 @@
 	a
 ) => fib
 
-fib 100000
+for 1 10 (i ->
+	put fib i
+)
