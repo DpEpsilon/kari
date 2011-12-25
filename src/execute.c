@@ -5,22 +5,16 @@
 #include "kari.h"
 #include "vec.h"
 
-#define FNSTACK_PUSH(val) do { if(fn_stack_i + 1 >= fn_stack_capacity) { \
-        if(fn_stack == initial_fn_stack) { \
-            fn_stack = NULL; \
-        } \
-        fn_stack = (kari_value_t**)GC_REALLOC(fn_stack, sizeof(kari_value_t*) * (fn_stack_capacity *= 2)); \
-    } \
-    fn_stack[fn_stack_i++] = val; } while(0)
-#define FNSTACK_POP() fn_stack[--fn_stack_i]
+#define FNSTACK_PUSH(val) do { if(val == NULL) { \
+		*(char*)0 = 0; \
+	} \
+    kari_vec_push(fn_stack, (void*)val); } while(0)
+#define FNSTACK_POP() kari_vec_pop(fn_stack);
 
 kari_value_t* kari_execute(kari_context_t* ctx, kari_token_t** tokens, size_t token_count, char** err)
 {
     //kari_vec_t* function_stack = new_kari_vec();
-    size_t fn_stack_i = 0;
-    size_t fn_stack_capacity = 4;
-    kari_value_t* initial_fn_stack[4];
-    kari_value_t** fn_stack = (kari_value_t**)&initial_fn_stack;
+    kari_vec_t* fn_stack = new_kari_vec();
     
     kari_value_t *value = NULL, *tmp_val;
     kari_context_t* lookup_ctx;
@@ -29,7 +23,7 @@ kari_value_t* kari_execute(kari_context_t* ctx, kari_token_t** tokens, size_t to
     kari_vec_t* tmp_vec;
     st_data_t tmp_st;
     size_t i = 0, tmp_i = 0;
-    while(i < token_count || fn_stack_i > 0) {
+    while(i < token_count || fn_stack->count > 0) {
         if(i < token_count) {
             do_next_token:
             switch(tokens[i]->type) {
@@ -177,7 +171,7 @@ kari_value_t* kari_execute(kari_context_t* ctx, kari_token_t** tokens, size_t to
             }
             i++;
         }
-        while(fn_stack_i > 0) {
+        while(fn_stack->count > 0) {
             if(value == NULL) {
                 break;
             }
